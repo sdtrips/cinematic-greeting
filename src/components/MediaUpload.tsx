@@ -18,57 +18,50 @@ export function MediaUpload({ accentColor, scheme }: Props) {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto px-6">
-      {/* Section title */}
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-        <div className="mx-auto mb-4 h-px w-16" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }} />
-        <h3 className="text-2xl md:text-3xl font-bold" style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}>
+    <div className="w-full max-w-lg mx-auto px-8">
+      {/* Section header */}
+      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 2 }} className="text-center mb-16">
+        <div className="w-px h-12 mx-auto mb-6" style={{ background: `linear-gradient(180deg, transparent, ${accentColor}50, transparent)` }} />
+        <p className="text-[10px] tracking-[0.3em] uppercase mb-3" style={{ color: scheme.muted }}>Personal touch</p>
+        <h3 className="text-3xl md:text-4xl font-light" style={{ color: scheme.text, fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}>
           فيديو أو صورة خاصة
         </h3>
-        <p className="text-sm mt-2" style={{ color: scheme.muted }}>أضف لمسة شخصية</p>
+        <div className="w-px h-12 mx-auto mt-6" style={{ background: `linear-gradient(180deg, ${accentColor}50, transparent)` }} />
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        className="relative rounded-3xl overflow-hidden backdrop-blur-md"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: `1px solid ${uploaded ? accentColor + '40' : 'rgba(255,255,255,0.06)'}`,
-          minHeight: '220px',
-        }}
+        transition={{ duration: 1.5 }}
+        className="relative"
       >
         {uploaded ? (
-          <div className="flex flex-col items-center justify-center py-14 px-6">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', bounce: 0.4 }}
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
-              style={{ background: `linear-gradient(135deg, ${accentColor}20, ${accentColor}10)`, border: `1px solid ${accentColor}30` }}
+          <div className="py-16 text-center" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', bounce: 0.3 }}
+              className="text-4xl mb-6"
             >
-              <span className="text-2xl">✓</span>
+              ✓
             </motion.div>
-            <p className="font-medium mb-1 text-sm" style={{ color: scheme.text }}>{fileName}</p>
-            <p className="text-xs mb-4" style={{ color: scheme.muted }}>تم الرفع بنجاح</p>
+            <p className="font-light text-sm mb-2" style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}>{fileName}</p>
+            <p className="text-xs mb-6" style={{ color: scheme.muted }}>تم الرفع بنجاح</p>
             <button onClick={() => { setUploaded(false); setFileName(''); }}
-              className="text-xs underline transition-colors" style={{ color: accentColor }}>
+              className="text-xs tracking-wider underline" style={{ color: accentColor }}>
               رفع ملف آخر
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center py-14 px-6 cursor-pointer group">
-            <motion.div whileHover={{ scale: 1.1, rotate: 5 }}
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-5 transition-all group-hover:shadow-lg"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px dashed rgba(255,255,255,0.15)',
-              }}
+          <label className="block py-16 text-center cursor-pointer group transition-all"
+            style={{ border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <motion.div whileHover={{ scale: 1.05 }}
+              className="text-4xl mb-6 opacity-30 group-hover:opacity-60 transition"
             >
-              <span className="text-2xl opacity-50 group-hover:opacity-100 transition">📹</span>
+              📹
             </motion.div>
-            <p className="font-medium text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <p className="font-light text-sm mb-2" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Georgia, serif' }}>
               اسحب ملفاً هنا أو اضغط للرفع
             </p>
-            <p className="text-xs" style={{ color: scheme.muted }}>فيديو، صورة، أو صوت — حتى 50 ميغابايت</p>
+            <p className="text-[10px] tracking-wider" style={{ color: scheme.muted }}>فيديو، صورة، أو صوت</p>
             <input type="file" accept="video/*,image/*,audio/*" onChange={handleFile} className="absolute inset-0 opacity-0 cursor-pointer" />
           </label>
         )}

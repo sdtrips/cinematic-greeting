@@ -12,38 +12,48 @@ const scheme = {
   secondary: '#1a0a2e',
   accent: '#d4a574',
   accentAlt: '#ff3366',
-  background: '#050208',
-  text: '#faf5ef',
-  muted: '#8a7a6a',
+  background: '#000000',
+  text: '#f0ebe3',
+  muted: '#6a5a4a',
 };
 
 interface Slide {
   id: string;
+  type: 'opening' | 'title' | 'message' | 'finale';
+  headline?: string;
+  subtext?: string;
   emoji?: string;
-  headline: string;
-  subtext: string;
   reveal: 'typewriter' | 'fade' | 'slide' | 'scramble';
-  bg?: string;
+  duration: number;
 }
 
 const slides: Slide[] = [
-  { id: '0', headline: '', subtext: '', reveal: 'fade', emoji: '🎁' },
-  { id: '1', headline: 'في يوم ميلادك', subtext: 'كل سنة وأنتِ بألف خير\nيا أجمل هدية من الله لنا', reveal: 'slide' },
-  { id: '2', headline: 'أنتِ النور', subtext: 'اللي يضيء كل مكان\nوتبسط كل من حولك بابتسامتك', reveal: 'typewriter' },
-  { id: '3', headline: 'من كل القلب', subtext: 'أتمنى لك سنة مليانة\nفرح وصحة وحب ونجاح', reveal: 'fade' },
-  { id: '4', headline: '✨', subtext: 'عيد ميلاد سعيد يا نور\nكل سنة وأنتِ بخير', reveal: 'scramble' },
+  { id: '0', type: 'opening', emoji: '🎬', duration: 3000, reveal: 'fade' },
+  { id: '1', type: 'title', headline: 'في يوم ميلادك', duration: 5000, reveal: 'slide' },
+  { id: '2', type: 'message', headline: 'أنتِ النور', subtext: 'اللي يضيء كل مكان\nوتبسط كل من حولك', duration: 6000, reveal: 'typewriter' },
+  { id: '3', type: 'message', headline: 'من كل القلب', subtext: 'أتمنى لك سنة مليانة\nفرح وصحة وحب', duration: 5000, reveal: 'fade' },
+  { id: '4', type: 'finale', headline: 'عيد ميلاد سعيد', subtext: 'كل سنة وأنتِ بخير ✨', emoji: '💌', duration: 4000, reveal: 'scramble' },
 ];
 
 export function GreetingExperience() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [started, setStarted] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [showBars, setShowBars] = useState(true);
 
   const goNext = useCallback(() => {
     if (currentSlide >= slides.length - 1) { setEnded(true); return; }
     setCurrentSlide(prev => prev + 1);
   }, [currentSlide]);
 
+  // Auto-advance
+  useEffect(() => {
+    if (!started || ended) return;
+    const timer = setTimeout(goNext, slides[currentSlide].duration);
+    return () => clearTimeout(timer);
+  }, [started, ended, currentSlide, goNext]);
+
+  // Keyboard
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
@@ -52,84 +62,64 @@ export function GreetingExperience() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext]);
 
-  // ─── LANDING ────────────────────────────────────────────────────────
+  // ─── CINEMATIC LANDING ──────────────────────────────────────────────
   if (!started) {
     return (
-      <div className="w-screen h-screen flex flex-col items-center justify-center relative overflow-hidden" style={{ background: scheme.background }}>
-        <ParticleBackground colorScheme={scheme} particleCount={900} speed={0.4} />
+      <div className="w-screen h-screen flex flex-col items-center justify-center relative overflow-hidden" style={{ background: '#000' }}>
+        <ParticleBackground colorScheme={scheme} particleCount={300} speed={0.15} />
 
-        {/* Decorative rings */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          {[1, 2, 3].map(i => (
-            <motion.div key={i}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 0.08 }}
-              transition={{ delay: i * 0.4, duration: 2, ease: 'easeOut' }}
-              className="absolute rounded-full"
-              style={{
-                width: `${i * 280}px`, height: `${i * 280}px`,
-                border: `1px solid ${scheme.accent}`,
-              }}
-            />
-          ))}
-        </div>
+        {/* Film grain overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }}
+        />
 
-        <div className="relative z-10 text-center px-6 max-w-xl">
-          {/* Crown / Logo */}
+        {/* Letterbox bars */}
+        <div className="absolute top-0 left-0 right-0 h-[12vh] bg-black z-20" />
+        <div className="absolute bottom-0 left-0 right-0 h-[12vh] bg-black z-20" />
+
+        <div className="relative z-10 text-center px-6 max-w-lg">
+          {/* Studio logo style */}
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.3, duration: 1.2, type: 'spring', bounce: 0.3 }}
-            className="w-24 h-24 mx-auto mb-10 rounded-full flex items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${scheme.accent}, ${scheme.accentAlt})`,
-              boxShadow: `0 0 100px ${scheme.accent}40, 0 0 200px ${scheme.accentAlt}20`,
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 2 }}
+            className="mb-12"
           >
-            <span className="text-4xl">👑</span>
+            <div className="w-px h-16 mx-auto mb-6" style={{ background: `linear-gradient(180deg, transparent, ${scheme.accent}60, transparent)` }} />
+            <p className="text-xs tracking-[0.3em] uppercase mb-2" style={{ color: scheme.muted }}>A Cinematic Experience</p>
+            <div className="w-px h-8 mx-auto mt-6" style={{ background: `linear-gradient(180deg, ${scheme.accent}60, transparent)` }} />
           </motion.div>
 
           {/* Title */}
-          <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8, duration: 1 }}>
-            <h1 className="text-5xl md:text-7xl font-bold mb-3 leading-tight" style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 2 }}>
+            <h1 className="text-6xl md:text-8xl font-light mb-2" style={{ color: scheme.text, fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}>
               معايدة
             </h1>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight" style={{
-              background: `linear-gradient(135deg, ${scheme.accent}, ${scheme.accentAlt})`,
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>
+            <div className="flex items-center justify-center gap-4 my-4">
+              <div className="h-px flex-1 max-w-[60px]" style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent})` }} />
+              <span className="text-xs tracking-[0.2em]" style={{ color: scheme.accent }}>✦</span>
+              <div className="h-px flex-1 max-w-[60px]" style={{ background: `linear-gradient(90deg, ${scheme.accent}, transparent)` }} />
+            </div>
+            <h1 className="text-6xl md:text-8xl font-light" style={{ color: scheme.accent, fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}>
               سينمائية
             </h1>
           </motion.div>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} transition={{ delay: 1.4, duration: 1 }}
-            className="text-base md:text-lg mb-12 leading-relaxed"
-            style={{ color: scheme.muted, fontFamily: 'Georgia, serif' }}
-          >
-            تجربة بصرية فريدة تحكي قصة من القلب
-          </motion.p>
-
           {/* CTA */}
           <motion.button
-            initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.8, duration: 0.8 }}
-            whileHover={{ scale: 1.05, boxShadow: `0 0 60px ${scheme.accent}50` }}
-            whileTap={{ scale: 0.97 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3, duration: 1.5 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setStarted(true)}
-            className="relative px-12 py-4 rounded-full font-bold text-lg overflow-hidden"
-            style={{ color: scheme.background }}
+            className="mt-16 px-10 py-3 rounded-none font-light text-sm tracking-[0.15em] uppercase transition-all"
+            style={{
+              border: `1px solid ${scheme.accent}40`,
+              color: scheme.accent,
+              background: 'transparent',
+            }}
           >
-            <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${scheme.accent}, ${scheme.accentAlt})` }} />
-            <span className="relative z-10">ابدأ التجربة ✦</span>
+            ▶ شاهد
           </motion.button>
-
-          {/* Decorative line */}
-          <motion.div
-            initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.2, duration: 1.5 }}
-            className="mt-12 mx-auto h-px w-40"
-            style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent}60, transparent)` }}
-          />
         </div>
       </div>
     );
@@ -138,49 +128,71 @@ export function GreetingExperience() {
   // ─── ENDING ──────────────────────────────────────────────────────────
   if (ended) {
     return (
-      <div className="min-h-screen" style={{ background: scheme.background }}>
+      <div className="min-h-screen" style={{ background: '#000' }}>
+        {/* Credits style ending */}
         <div className="relative h-screen flex items-center justify-center overflow-hidden">
-          <ParticleBackground colorScheme={scheme} particleCount={500} speed={0.15} />
-          <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
+          <ParticleBackground colorScheme={scheme} particleCount={200} speed={0.1} />
+
+          {/* Film grain */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }}
+          />
+
+          <div className="absolute top-0 left-0 right-0 h-[12vh] bg-black z-20" />
+          <div className="absolute bottom-0 left-0 right-0 h-[12vh] bg-black z-20" />
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 3 }}
             className="relative z-10 text-center px-6"
           >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              className="text-7xl md:text-8xl mb-8"
-            >
-              💌
-            </motion.div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}>
+            <div className="w-px h-20 mx-auto mb-8" style={{ background: `linear-gradient(180deg, transparent, ${scheme.accent}60, transparent)` }} />
+            <p className="text-xs tracking-[0.3em] uppercase mb-6" style={{ color: scheme.muted }}>Fin</p>
+            <h2 className="text-4xl md:text-6xl font-light mb-4" style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}>
               شكراً لك
             </h2>
-            <div className="mx-auto my-6 h-px w-32" style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent}, transparent)` }} />
-            <p className="text-lg" style={{ color: scheme.muted }}>رسالتك وصلت من القلب ❤️</p>
+            <div className="flex items-center justify-center gap-4 my-6">
+              <div className="h-px w-16" style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent})` }} />
+              <span className="text-xs" style={{ color: scheme.accent }}>❤️</span>
+              <div className="h-px w-16" style={{ background: `linear-gradient(90deg, ${scheme.accent}, transparent)` }} />
+            </div>
+            <p className="text-sm" style={{ color: scheme.muted }}>رسالتك وصلت من القلب</p>
+            <div className="w-px h-20 mx-auto mt-8" style={{ background: `linear-gradient(180deg, ${scheme.accent}60, transparent)` }} />
           </motion.div>
         </div>
 
-        <div className="relative z-10 py-20 space-y-20">
+        {/* Sections */}
+        <div className="relative z-10 py-24 space-y-24">
           <CommentSection accentColor={scheme.accent} scheme={scheme} />
           <MediaUpload accentColor={scheme.accent} scheme={scheme} />
         </div>
 
-        <div className="py-10 text-center" style={{ color: '#333' }}>
-          <div className="mx-auto mb-4 h-px w-24" style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent}30, transparent)` }} />
-          <p className="text-xs" style={{ color: scheme.muted }}>صُمم بحب ✦ معايدة سينمائية</p>
+        {/* Footer credits */}
+        <div className="py-16 text-center border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+          <p className="text-xs tracking-[0.2em] uppercase" style={{ color: scheme.muted }}>صُمم بحب ✦ 2026</p>
         </div>
       </div>
     );
   }
 
-  // ─── SLIDES ──────────────────────────────────────────────────────────
+  // ─── CINEMATIC SLIDES ────────────────────────────────────────────────
   const slide = slides[currentSlide];
 
   return (
-    <div className="w-screen h-screen relative overflow-hidden cursor-pointer" style={{ background: scheme.background }}
-      onClick={goNext} onTouchEnd={(e) => { e.preventDefault(); goNext(); }}
+    <div className="w-screen h-screen relative overflow-hidden cursor-pointer" style={{ background: '#000' }}
+      onClick={goNext}
     >
-      <ParticleBackground colorScheme={scheme} particleCount={400} speed={0.2} />
+      <ParticleBackground colorScheme={scheme} particleCount={150} speed={0.1} />
+
+      {/* Film grain */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-30"
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }}
+      />
+
+      {/* Letterbox bars */}
+      <div className="absolute top-0 left-0 right-0 h-[12vh] bg-black z-20" />
+      <div className="absolute bottom-0 left-0 right-0 h-[12vh] bg-black z-20" />
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -188,94 +200,128 @@ export function GreetingExperience() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1.5 }}
           className="absolute inset-0 flex flex-col items-center justify-center px-8 z-10"
         >
-          {currentSlide === 0 ? (
+          {slide.type === 'opening' && (
             <motion.div
-              initial={{ scale: 0, rotate: -90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', bounce: 0.4, duration: 1.2 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.5, ease: 'easeOut' }}
               className="text-8xl md:text-9xl"
             >
               {slide.emoji}
             </motion.div>
-          ) : (
-            <div className="max-w-2xl text-center">
-              {/* Decorative top line */}
+          )}
+
+          {slide.type === 'title' && (
+            <div className="text-center">
               <motion.div
-                initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
-                transition={{ delay: 0.3, duration: 1 }}
-                className="mx-auto mb-8 h-px w-20"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.3, duration: 1.5 }}
+                className="mx-auto mb-10 h-px w-24"
                 style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent}, transparent)` }}
               />
-
-              {/* Headline */}
               <motion.h1
-                initial={{ y: 50, opacity: 0 }}
+                initial={{ y: 40, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                className="text-5xl md:text-7xl font-bold mb-8 leading-tight"
+                transition={{ delay: 0.5, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+                className="text-6xl md:text-8xl font-light"
+                style={{ color: scheme.text, fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}
+              >
+                <TextReveal text={slide.headline || ''} type={slide.reveal} speed={25} direction="up" />
+              </motion.h1>
+            </div>
+          )}
+
+          {slide.type === 'message' && (
+            <div className="text-center max-w-xl">
+              <motion.h1
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                className="text-5xl md:text-7xl font-light mb-10"
+                style={{ color: scheme.text, fontFamily: 'Georgia, serif', letterSpacing: '0.03em' }}
+              >
+                <TextReveal text={slide.headline || ''} type={slide.reveal} speed={30} direction="up" />
+              </motion.h1>
+              {slide.subtext && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.6 }}
+                  transition={{ delay: 1, duration: 1.5 }}
+                >
+                  {slide.subtext.split('\n').map((line, i) => (
+                    <motion.p
+                      key={i}
+                      initial={{ y: 15, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 1.2 + i * 0.3 }}
+                      className="text-lg md:text-xl font-light leading-relaxed"
+                      style={{ color: scheme.muted, fontFamily: 'Georgia, serif' }}
+                    >
+                      {line}
+                    </motion.p>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+          )}
+
+          {slide.type === 'finale' && (
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', bounce: 0.3, duration: 1.5 }}
+                className="text-7xl md:text-8xl mb-8"
+              >
+                {slide.emoji}
+              </motion.div>
+              <motion.h1
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 1.2 }}
+                className="text-5xl md:text-7xl font-light mb-6"
                 style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}
               >
-                <TextReveal text={slide.headline} type={slide.reveal} speed={30} direction="up" />
+                <TextReveal text={slide.headline || ''} type={slide.reveal} speed={30} direction="up" />
               </motion.h1>
-
-              {/* Subtext */}
-              <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 0.7 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-                className="space-y-2"
-              >
-                {slide.subtext.split('\n').map((line, i) => (
-                  <motion.p
-                    key={i}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.8 + i * 0.2 }}
-                    className="text-xl md:text-2xl leading-relaxed"
-                    style={{ color: scheme.muted, fontFamily: 'Georgia, serif' }}
-                  >
-                    {line}
-                  </motion.p>
-                ))}
-              </motion.div>
-
-              {/* Decorative bottom line */}
-              <motion.div
-                initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
-                transition={{ delay: 1.2, duration: 1 }}
-                className="mx-auto mt-8 h-px w-20"
-                style={{ background: `linear-gradient(90deg, transparent, ${scheme.accent}, transparent)` }}
-              />
+              {slide.subtext && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.6 }}
+                  transition={{ delay: 1.5 }}
+                  className="text-lg"
+                  style={{ color: scheme.muted, fontFamily: 'Georgia, serif' }}
+                >
+                  {slide.subtext}
+                </motion.p>
+              )}
             </div>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Progress dots */}
-      <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-3 z-20">
-        {slides.map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              scale: i === currentSlide ? 1.3 : 1,
-              opacity: i === currentSlide ? 1 : 0.3,
-            }}
-            className="w-2 h-2 rounded-full"
-            style={{ background: i === currentSlide ? scheme.accent : scheme.muted }}
-          />
-        ))}
+      {/* Progress bar */}
+      <div className="absolute bottom-[12vh] left-0 right-0 h-px z-20" style={{ background: 'rgba(255,255,255,0.05)' }}>
+        <motion.div
+          key={currentSlide}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: slides[currentSlide].duration / 1000, ease: 'linear' }}
+          className="h-full origin-left"
+          style={{ background: scheme.accent }}
+        />
       </div>
 
-      {/* Subtle hint */}
-      <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} transition={{ delay: 3 }}
-        className="absolute bottom-20 left-0 right-0 text-center z-20"
-      >
-        <p className="text-xs" style={{ color: scheme.muted }}>اضغط للمتابعة</p>
-      </motion.div>
+      {/* Timecode */}
+      <div className="absolute bottom-[calc(12vh+12px)] left-8 z-20">
+        <p className="text-[10px] tracking-[0.15em] font-mono" style={{ color: scheme.muted }}>
+          {String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
+        </p>
+      </div>
     </div>
   );
 }

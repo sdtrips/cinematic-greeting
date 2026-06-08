@@ -27,45 +27,41 @@ export function CommentSection({ accentColor, scheme }: Props) {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto px-6">
-      {/* Section title */}
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-        <div className="mx-auto mb-4 h-px w-16" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }} />
-        <h3 className="text-2xl md:text-3xl font-bold" style={{ color: scheme.text, fontFamily: 'Georgia, serif' }}>
+    <div className="w-full max-w-lg mx-auto px-8">
+      {/* Section header — film credit style */}
+      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 2 }} className="text-center mb-16">
+        <div className="w-px h-12 mx-auto mb-6" style={{ background: `linear-gradient(180deg, transparent, ${accentColor}50, transparent)` }} />
+        <p className="text-[10px] tracking-[0.3em] uppercase mb-3" style={{ color: scheme.muted }}>Messages from the heart</p>
+        <h3 className="text-3xl md:text-4xl font-light" style={{ color: scheme.text, fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}>
           تعليقات الحضور
         </h3>
-        <p className="text-sm mt-2" style={{ color: scheme.muted }}>كلمات من القلب</p>
+        <div className="w-px h-12 mx-auto mt-6" style={{ background: `linear-gradient(180deg, ${accentColor}50, transparent)` }} />
       </motion.div>
 
-      {/* Comments list */}
-      <div className="space-y-4 mb-8">
+      {/* Comments */}
+      <div className="space-y-6 mb-12">
         <AnimatePresence>
           {comments.map((c, i) => (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="relative rounded-2xl p-5 backdrop-blur-md overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15, duration: 1 }}
+              className="relative py-6 text-center"
+              style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}
             >
-              {/* Accent line */}
-              <div className="absolute top-0 right-0 w-1 h-full" style={{ background: `linear-gradient(180deg, ${accentColor}40, transparent)` }} />
-
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}10)`, color: accentColor, border: `1px solid ${accentColor}30` }}>
-                  {c.name[0]}
-                </div>
-                <div>
-                  <span className="font-medium text-sm" style={{ color: scheme.text }}>{c.name}</span>
-                  <span className="block text-xs" style={{ color: scheme.muted }}>{c.timestamp.toLocaleDateString('ar')}</span>
-                </div>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="h-px flex-1 max-w-[40px]" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}30)` }} />
+                <span className="text-xs font-medium tracking-wider" style={{ color: accentColor }}>{c.name}</span>
+                <div className="h-px flex-1 max-w-[40px]" style={{ background: `linear-gradient(90deg, ${accentColor}30, transparent)` }} />
               </div>
-              <p className="text-sm leading-relaxed pr-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{c.message}</p>
+              <p className="text-sm leading-relaxed font-light" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Georgia, serif' }}>
+                {c.message}
+              </p>
+              <p className="text-[10px] mt-2 tracking-wider" style={{ color: scheme.muted }}>
+                {c.timestamp.toLocaleDateString('ar')}
+              </p>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -74,40 +70,28 @@ export function CommentSection({ accentColor, scheme }: Props) {
       {/* Add comment */}
       {!showForm ? (
         <motion.button
-          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
           onClick={() => setShowForm(true)}
-          className="w-full py-3.5 rounded-xl font-medium text-sm transition-all"
-          style={{
-            border: `1px dashed ${accentColor}50`,
-            color: accentColor,
-            background: `linear-gradient(135deg, ${accentColor}08, ${accentColor}04)`,
-          }}
+          className="w-full py-4 font-light text-xs tracking-[0.2em] uppercase transition-all"
+          style={{ border: `1px solid rgba(255,255,255,0.08)`, color: scheme.muted, background: 'transparent' }}
         >
           ✦ اترك تعليقاً
         </motion.button>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl p-6 space-y-4 backdrop-blur-md"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <input value={name} onChange={e => setName(e.target.value)} placeholder="اسمك"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-1"
-            style={{ background: 'rgba(255,255,255,0.05)', color: scheme.text, border: '1px solid rgba(255,255,255,0.08)', ['--tw-ring-color' as string]: accentColor }} />
+            className="w-full px-5 py-4 text-sm font-light outline-none transition-all"
+            style={{ background: 'transparent', color: scheme.text, border: '1px solid rgba(255,255,255,0.08)', fontFamily: 'Georgia, serif' }} />
           <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="رسالتك من القلب..." rows={3}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all focus:ring-1"
-            style={{ background: 'rgba(255,255,255,0.05)', color: scheme.text, border: '1px solid rgba(255,255,255,0.08)' }} />
-          <div className="flex gap-3">
+            className="w-full px-5 py-4 text-sm font-light outline-none resize-none transition-all"
+            style={{ background: 'transparent', color: scheme.text, border: '1px solid rgba(255,255,255,0.08)', fontFamily: 'Georgia, serif' }} />
+          <div className="flex gap-4">
             <button onClick={addComment}
-              className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all hover:shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}>
-              إرسال ✦
+              className="flex-1 py-4 font-light text-xs tracking-[0.15em] uppercase transition-all"
+              style={{ border: `1px solid ${accentColor}60`, color: accentColor, background: 'transparent' }}>
+              إرسال
             </button>
-            <button onClick={() => setShowForm(false)} className="px-5 py-3 rounded-xl text-sm" style={{ color: scheme.muted }}>
+            <button onClick={() => setShowForm(false)} className="px-6 py-4 text-xs tracking-wider" style={{ color: scheme.muted }}>
               إلغاء
             </button>
           </div>
